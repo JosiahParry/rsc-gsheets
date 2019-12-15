@@ -1,0 +1,107 @@
+Rmd with googlesheets4
+================
+
+This repository contains an example of an R Markdown document that reads
+from googlesheets and it deployed to RStudio Connect. Deploying content
+that interacts with a Google API can be a rather cumbersome process.
+Google authorization is usually done interactively via the
+[gargle](https://gargle.r-lib.org/) package. However, when you need to
+deploy to a headless machine this isn’t feasible.
+
+This example illustrates using an deploying an R Markdown document which
+uses data from googlesheets. The data in the Rmd is accessed from a
+private googlesheets. Then it is deployed and scheduled on RStudio
+Connect. This process is outline in great detail
+[here](https://gargle.r-lib.org/articles/non-interactive-auth.html#sidebar-1-deployment).
+
+## Authenticating
+
+Load the [`googlesheets4`](https://googlesheets4.tidyverse.org/)
+package.
+
+``` r
+library(googlesheets4)
+```
+
+By default gargle obfuscates the storage of the authentication token.
+Here we sepcify a project level directory `.secrets` which will contains
+our Google token. We will set the `garge_oath_cache` option to refer to
+this `.secrets` directory. We can check where the token will be cached
+with `gargle::gargle_oath_cache()`.
+
+``` r
+# designate project-specific cache
+options(gargle_oauth_cache = ".secrets")
+
+# check the value of the option, if you like
+gargle::gargle_oauth_cache()
+```
+
+Next we will have to preform the interactive authentication just once.
+Doing this will generate the token and store it for us. You will be
+required to select an email account to authenticate with.
+
+``` r
+# trigger auth on purpose --> store a token in the specified cache
+# a broswer will be opened
+googlesheets4::sheets_auth()
+```
+
+Now that you have completed the authentication and returned to R, we can
+double check that the token was cached in `.secrets`.
+
+``` r
+# see your token file in the cache, if you like
+list.files(".secrets/")
+```
+
+Voila\! Let’s deauthorize in our session so we can try authenticating
+once more, but this time without interactivity.
+
+``` r
+# deauth
+sheets_deauth()
+```
+
+In `sheets_auth()` we can specify where the token is cached and which
+email we used to authenticate.
+
+``` r
+# sheets reauth with specified token and email address
+sheets_auth(
+  cache = ".secrets",
+  email = "josiah@email.com"
+  )
+```
+
+Alternatively, we can specify these in the `options()` and run the
+authentication without an arguments supplied. Let’s first deauth in our
+session to try authenticating again.
+
+``` r
+# deauth again
+sheets_deauth()
+
+# set values in options
+options(
+  gargle_oauth_cache = ".secrets",
+  gargle_oauth_email = "josiah@email.com"
+)
+
+# run sheets auth
+sheets_auth()
+```
+
+Now that we are sure that authorization works without an interactive
+browser session, we should migrate the options into an `.Rprofile` file.
+This way, when an R session is spun up the options will be set from
+session start. Meaning, if you use `sheets_auth()` within your R
+Markdown document it will knit without having to open the browser.
+
+## Deploying to Connect
+
+In order for the deployment to RStudio Connect to work, the `.secrets`
+directory and `.Rprofile` files need to be in the bundle. Be sure to do
+this from the `Add Files` button. If you cannot see the files because
+they are hidden from Finder you cran press `cmnd + shift + .`. Then
+publish\!

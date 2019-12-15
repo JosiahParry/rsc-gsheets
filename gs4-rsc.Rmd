@@ -1,0 +1,51 @@
+---
+title: "googlesheets4 Report Example"
+output: html_document
+params:
+  min_year: 2000
+---
+
+```{r echo=TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(googlesheets4)
+# authenticate at startup
+sheets_auth()
+```
+
+```{r}
+vr_laws <- sheets_read("https://docs.google.com/spreadsheets/d/161PbFKPHyVHYm5UGBm0kDTih_tGIPAUgRzDy5PYKPyE/edit#gid=0") %>% 
+  select(1:4)
+
+```
+
+```{r}
+historic_vr <- expand(vr_laws, state, year = 1950:2019) %>% 
+  left_join(vr_laws, by = c("state", "year")) %>% 
+  group_by(state) %>% 
+  fill(strict, id_type, .direction = "down") %>% 
+  ungroup() %>% 
+  mutate(strict = replace_na(strict, 0),
+         id_type = replace_na(id_type, "no id requirement"))
+```
+
+
+```{r}
+# if a state ever had strict vr laws
+strict_vr_states <- count(historic_vr, state, strict) %>% 
+  spread(strict, n) %>% 
+  filter(!is.na(`1`)) %>% 
+  pull(state)
+
+historic_vr %>% 
+  filter(state %in% strict_vr_states,
+         year >= params$min_year) %>% 
+  group_by(state) %>% 
+  summarise(n_years = sum(strict)) %>% 
+  ungroup() %>% 
+  mutate(state = fct_reorder(state, n_years)) %>% 
+  ggplot(aes(state, n_years)) +
+  geom_col() +
+  coord_flip()
+
+```
+
