@@ -2,16 +2,17 @@ Rmd with googlesheets4
 ================
 
 This repository contains an example of an R Markdown document that reads
-from googlesheets and it deployed to RStudio Connect. Deploying content
+from googlesheets and is deployed to RStudio Connect. Deploying content
 that interacts with a Google API can be a rather cumbersome process.
 Google authorization is usually done interactively via the
 [gargle](https://gargle.r-lib.org/) package. However, when you need to
 deploy to a headless machine this isn’t feasible.
 
-This example illustrates using an deploying an R Markdown document which
-uses data from googlesheets. The data in the Rmd is accessed from a
-private googlesheets. Then it is deployed and scheduled on RStudio
-Connect. This process is outline in great detail
+This example illustrates deploying an R Markdown document which uses
+data from googlesheets. The data in the Rmd is accessed from a private
+googlesheet which is then deployed and scheduled on [RStudio
+Connect](https://rstudio.com/products/connect/). This process is outline
+in great detail
 [here](https://gargle.r-lib.org/articles/non-interactive-auth.html#sidebar-1-deployment).
 
 ## Authenticating
@@ -24,7 +25,7 @@ library(googlesheets4)
 ```
 
 By default gargle obfuscates the storage of the authentication token.
-Here we sepcify a project level directory `.secrets` which will contains
+Here we sepcify a project level directory `.secrets` which will contain
 our Google token. We will set the `garge_oath_cache` option to refer to
 this `.secrets` directory. We can check where the token will be cached
 with `gargle::gargle_oath_cache()`.
