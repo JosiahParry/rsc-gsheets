@@ -1,5 +1,5 @@
 ---
-title: "Rmd with googlesheets4"
+title: "Non-interactive user tokens with googlesheets4"
 subtitle: "Deploying to RStudio Connect"
 output: github_document
 ---
@@ -12,9 +12,9 @@ This repository contains an example of an R Markdown document that uses googlesh
 
 The path of least resistance for Google auth is to sit back and respond to some interactive prompts, but this won't work for something that is deployed to a headless machine. You have to do some advance planning to provide your deployed product with a token.
 
-The [gargle](https://gargle.r-lib.org/) vignette [Non-interactive auth](https://gargle.r-lib.org/articles/non-interactive-auth.html) is the definitive document for how to do this. (The gargle package handles auth for several packages, such as bigrquery, googledrive, gmailr, and googlesheets4.)
+The [gargle](https://gargle.r-lib.org/) vignette [Non-interactive auth](https://gargle.r-lib.org/articles/non-interactive-auth.html) is the definitive document for how to do this. The gargle package handles auth for several packages, such as bigrquery, googledrive, gmailr, and googlesheets4.
 
-This repo provides a detailed example for the scenario where you are using an OAuth2 user token for a product deployed on RStudio Connect (see vignette section [Project-level OAuth cache](https://gargle.r-lib.org/articles/non-interactive-auth.html#project-level-oauth-cache)). (Note that service account tokens are the preferred strategy for a deployed product, but sometimes there are reasons to use a user token.)
+This repo provides a detailed example for the scenario where you are using an OAuth2 user token for a product deployed on RStudio Connect (see vignette section [Project-level OAuth cache](https://gargle.r-lib.org/articles/non-interactive-auth.html#project-level-oauth-cache) from which this was adapted). **Note** that service account tokens are the preferred strategy for a deployed product, but sometimes there are reasons to use a user token.
 
 ## Authenticating 
 
@@ -90,4 +90,11 @@ Now that we are sure that authorization works without an interactive browser ses
 
 In order for the deployment to RStudio Connect to work, the `.secrets` directory and `.Rprofile` files need to be in the bundle. Be sure to do this from the `Add Files` button. If you cannot see the files because they are hidden from Finder you cran press `cmnd + shift + .`. Then publish!
 
+## Other Google Platforms
 
+This same process can be replicated for other packages that use gargle authentication. By virtue of having gargle as the central auth package for Google APIs, the workflow outlined here, and the others in the non-interactive auth vignette, can can be utilized for other google API packages (i.e. googledrive).
+
+```{r}
+# authenticate with googledrive and create a token
+googledrive::drive_auth()
+```

@@ -1,19 +1,28 @@
-Rmd with googlesheets4
+Non-interactive user tokens with googlesheets4
 ================
 
-This repository contains an example of an R Markdown document that reads
-from googlesheets and is deployed to RStudio Connect. Deploying content
-that interacts with a Google API can be a rather cumbersome process.
-Google authorization is usually done interactively via the
-[gargle](https://gargle.r-lib.org/) package. However, when you need to
-deploy to a headless machine this isn’t feasible.
+This repository contains an example of an R Markdown document that uses
+googlesheets4 to read from a private Google Sheet and is deployed to
+[RStudio Connect](https://rstudio.com/products/connect/).
 
-This example illustrates deploying an R Markdown document which uses
-data from googlesheets. The data in the Rmd is accessed from a private
-googlesheet which is then deployed and scheduled on [RStudio
-Connect](https://rstudio.com/products/connect/). This process is outline
-in great detail
-[here](https://gargle.r-lib.org/articles/non-interactive-auth.html#sidebar-1-deployment).
+The path of least resistance for Google auth is to sit back and respond
+to some interactive prompts, but this won’t work for something that is
+deployed to a headless machine. You have to do some advance planning to
+provide your deployed product with a token.
+
+The [gargle](https://gargle.r-lib.org/) vignette [Non-interactive
+auth](https://gargle.r-lib.org/articles/non-interactive-auth.html) is
+the definitive document for how to do this. The gargle package handles
+auth for several packages, such as bigrquery, googledrive, gmailr, and
+googlesheets4.
+
+This repo provides a detailed example for the scenario where you are
+using an OAuth2 user token for a product deployed on RStudio Connect
+(see vignette section [Project-level OAuth
+cache](https://gargle.r-lib.org/articles/non-interactive-auth.html#project-level-oauth-cache)
+from which this was adapted). **Note** that service account tokens are
+the preferred strategy for a deployed product, but sometimes there are
+reasons to use a user token.
 
 ## Authenticating
 
@@ -24,11 +33,12 @@ package.
 library(googlesheets4)
 ```
 
-By default gargle obfuscates the storage of the authentication token.
-Here we sepcify a project level directory `.secrets` which will contain
-our Google token. We will set the `garge_oath_cache` option to refer to
-this `.secrets` directory. We can check where the token will be cached
-with `gargle::gargle_oath_cache()`.
+By default, gargle uses a central token store, outside of the project,
+which isn’t going to work for us. Instead we specify a project level
+directory `.secrets` which will contain our Google token. We will set
+the `gargle_oath_cache` option to refer to this `.secrets` directory. We
+can check where the token will be cached with
+`gargle::gargle_ouath_cache()`.
 
 ``` r
 # designate project-specific cache
@@ -38,7 +48,7 @@ options(gargle_oauth_cache = ".secrets")
 gargle::gargle_oauth_cache()
 ```
 
-Next we will have to preform the interactive authentication just once.
+Next we will have to perform the interactive authentication just once.
 Doing this will generate the token and store it for us. You will be
 required to select an email account to authenticate with.
 
@@ -106,3 +116,16 @@ directory and `.Rprofile` files need to be in the bundle. Be sure to do
 this from the `Add Files` button. If you cannot see the files because
 they are hidden from Finder you cran press `cmnd + shift + .`. Then
 publish\!
+
+## Other Google Platforms
+
+This same process can be replicated for other packages that use gargle
+authentication. By virtue of having gargle as the central auth package
+for Google APIs, the workflow outlined here, and the others in the
+non-interactive auth vignette, can can be utilized for other google API
+packages (i.e. googledrive).
+
+``` r
+# authenticate with googledrive and create a token
+googledrive::drive_auth()
+```
