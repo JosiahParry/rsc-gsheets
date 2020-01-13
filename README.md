@@ -36,9 +36,9 @@ library(googlesheets4)
 By default, gargle uses a central token store, outside of the project,
 which isn’t going to work for us. Instead we specify a project level
 directory `.secrets` which will contain our Google token. We will set
-the `gargle_oath_cache` option to refer to this `.secrets` directory. We
-can check where the token will be cached with
-`gargle::gargle_ouath_cache()`.
+the `gargle_oauth_cache` option to refer to this `.secrets` directory.
+We can check where the token will be cached with
+`gargle::gargle_oauth_cache()`.
 
 ``` r
 # designate project-specific cache
